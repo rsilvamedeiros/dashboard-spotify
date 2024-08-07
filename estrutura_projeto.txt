@@ -1,0 +1,24 @@
+spotify-dashboard
+├── components
+│   ├── Layout.tsx
+│   ├── Navbar.tsx
+│   ├── PlaylistCard.tsx
+│   ├── ArtistCard.tsx
+├── lib
+│   └── mongodb.ts
+├── models
+│   └── User.ts
+├── pages
+│   ├── api
+│   │   ├── auth
+│   │   │   └── [...nextauth].ts
+│   ├── dashboard.tsx
+│   ├── _app.tsx
+│   └── index.tsx
+├── public
+│   └── spotify-logo.png
+├── styles
+│   ├── globals.css
+│   └── theme.ts
+├── .env.local
+└── tsconfig.json
