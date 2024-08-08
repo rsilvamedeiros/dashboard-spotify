@@ -1,11 +1,8 @@
 // pages/api/auth/callback/spotify.js
 
-/*
-Depois que o usuário fizer o login no Spotify, ele será redirecionado para o SPOTIFY_REDIRECT_URI, que você configurou como http://localhost:3000/api/auth/callback/spotify.
-*/
-
 import axios from "axios";
 import querystring from "querystring";
+import { serialize } from "cookie";
 
 export default async function handler(req, res) {
   const code = req.query.code || null;
@@ -40,8 +37,18 @@ export default async function handler(req, res) {
     const accessToken = response.data.access_token;
     const refreshToken = response.data.refresh_token;
 
-    // Armazene os tokens no cookie, no banco de dados, ou diretamente no contexto da sessão, conforme necessário
-    res.status(200).json({ accessToken, refreshToken });
+    // Armazenar o token em um cookie
+    res.setHeader(
+      "Set-Cookie",
+      serialize("access_token", accessToken, { path: "/", httpOnly: true })
+    );
+    res.setHeader(
+      "Set-Cookie",
+      serialize("refresh_token", refreshToken, { path: "/", httpOnly: true })
+    );
+
+    // Redirecionar para a página principal ou painel
+    res.redirect("/dashboard");
   } catch (error) {
     console.error("Error fetching access token:", error.response.data);
     res.status(500).json({ error: "Failed to fetch access token" });
