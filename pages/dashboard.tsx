@@ -9,16 +9,18 @@ const Dashboard: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Obter o token do cookie (ou sessionStorage se preferir)
-        const token = document.cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
+        // Obter o token do cookie
+        const response = await fetch('/api/auth/me');
+        const { accessToken } = await response.json();
 
-        const response = await axios.get('https://api.spotify.com/v1/me', {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        setData(response.data);
+        if (accessToken) {
+          const userResponse = await axios.get('https://api.spotify.com/v1/me', {
+            headers: {
+              Authorization: `Bearer ${accessToken}`,
+            },
+          });
+          setData(userResponse.data);
+        }
       } catch (error) {
         console.error('Error fetching data from Spotify:', error);
       }
