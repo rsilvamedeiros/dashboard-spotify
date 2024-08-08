@@ -1,63 +1,45 @@
-import { useSession } from 'next-auth/react';
-import { useEffect, useState } from 'react';
-import axios from 'axios';
-import Layout from '../components/Layout';
-import PlaylistCard from '../components/PlaylistCard';
-import ArtistCard from '../components/ArtistCard';
-import { Grid, Typography } from '@mui/material';
+// pages/dashboard.tsx
 
-export default function Dashboard() {
-  const { data: session } = useSession();
-  const [playlists, setPlaylists] = useState([]);
-  const [topArtists, setTopArtists] = useState([]);
+import React, { useEffect, useState } from 'react';
+import axios from 'axios';
+
+const Dashboard: React.FC = () => {
+  const [data, setData] = useState<any>(null);
 
   useEffect(() => {
-    if (session) {
-      axios
-        .get('https://api.spotify.com/v1/me/playlists', {
-          headers: {
-            Authorization: `Bearer ${session.accessToken}`,
-          },
-        })
-        .then((response) => setPlaylists(response.data.items));
+    const fetchData = async () => {
+      try {
+        // Obter o token do cookie (ou sessionStorage se preferir)
+        const token = document.cookie.replace(/(?:(?:^|.*;\s*)access_token\s*\=\s*([^;]*).*$)|^.*$/, "$1");
 
-      axios
-        .get('https://api.spotify.com/v1/me/top/artists', {
+        const response = await axios.get('https://api.spotify.com/v1/me', {
           headers: {
-            Authorization: `Bearer ${session.accessToken}`,
+            Authorization: `Bearer ${token}`,
           },
-        })
-        .then((response) => setTopArtists(response.data.items));
-    }
-  }, [session]);
+        });
 
-  if (!session) {
-    return null;
-  }
+        setData(response.data);
+      } catch (error) {
+        console.error('Error fetching data from Spotify:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   return (
-    <Layout>
-      <Typography variant="h4" gutterBottom>
-        Your Playlists
-      </Typography>
-      <Grid container spacing={2}>
-        {playlists.map((playlist) => (
-          <Grid item xs={12} sm={6} md={4} key={playlist.id}>
-            <PlaylistCard playlist={playlist} />
-          </Grid>
-        ))}
-      </Grid>
-
-      <Typography variant="h4" gutterBottom sx={{ mt: 4 }}>
-        Your Top Artists
-      </Typography>
-      <Grid container spacing={2}>
-        {topArtists.map((artist) => (
-          <Grid item xs={12} sm={6} md={4} key={artist.id}>
-            <ArtistCard artist={artist} />
-          </Grid>
-        ))}
-      </Grid>
-    </Layout>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold">Dashboard</h1>
+      {data ? (
+        <div>
+          <h2 className="text-xl">Welcome, {data.display_name}</h2>
+          <img src={data.images[0]?.url} alt="Profile" className="rounded-full w-32 h-32" />
+        </div>
+      ) : (
+        <p>Loading...</p>
+      )}
+    </div>
   );
-}
+};
+
+export default Dashboard;
